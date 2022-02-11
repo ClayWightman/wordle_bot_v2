@@ -1,5 +1,6 @@
 import csv
 
+
 def get_all_words():
     words = []
     with open('valid_words.csv') as f:
@@ -10,7 +11,6 @@ def get_all_words():
     return words
 
 
-#WORKS
 def get_possible_words(guess_word, pruned_words):
     possible_words = []
     for word in pruned_words:
@@ -23,6 +23,7 @@ def get_possible_words(guess_word, pruned_words):
         if viable_word:
             possible_words.append(word)
     return possible_words
+
 
 def add_letter_to_guess_word_from_two_halves(guess_word, half_one, half_two, pruned_words):
     half_of_half_one = len(half_one)/2
@@ -60,8 +61,6 @@ def add_letter_to_guess_word_from_two_halves(guess_word, half_one, half_two, pru
     return guess_word
 
 
-
-
 def get_first_letter_for_guess_word(guess_word, pruned_words):
     letter_frequency_by_index = {0: {}, 1: {}, 2: {}, 3: {}, 4: {}}
     possible_words = get_possible_words(guess_word, pruned_words)
@@ -87,6 +86,7 @@ def get_first_letter_for_guess_word(guess_word, pruned_words):
     guess_word = guess_word[:best_position] + best_letter + guess_word[best_position+1:]
     return guess_word
 
+
 def split_words(guess_word, pruned_words):
     words_guessable = []
     words_not_guessable = []
@@ -105,8 +105,6 @@ def split_words(guess_word, pruned_words):
     return halves
 
 
-
-
 def get_guess_word(guess_word, pruned_words):
     if not '*' in guess_word:
         return guess_word
@@ -119,6 +117,7 @@ def get_guess_word(guess_word, pruned_words):
     guess_word = get_guess_word(guess_word, pruned_words)
     return guess_word
 
+
 def prune_words(guess_word, accuracy, pruned_words):
     new_pruned_words = pruned_words.copy()
     inx = 0
@@ -126,14 +125,10 @@ def prune_words(guess_word, accuracy, pruned_words):
         if num == '2':
             for word in pruned_words:
                 if word[inx] != guess_word[inx] and word in new_pruned_words:
-                    if word == 'pause':
-                        print("HAPPENS AT 2")
                     new_pruned_words.remove(word)
         elif num == '1':  #TODO:  MAKE THIS REMOVE WORDS WHICH HAVE LETTERS IN THE SAME POSITION
             for word in pruned_words:
                 if not guess_word[inx] in word and word in new_pruned_words:
-                    if word == 'pause':
-                        print("HAPPENS AT 1")
                     new_pruned_words.remove(word)
                 if word[inx] == guess_word[inx] and word in new_pruned_words:
                     new_pruned_words.remove(word)
@@ -149,87 +144,34 @@ def prune_words(guess_word, accuracy, pruned_words):
                 #remove all words with this letter
                 for word in pruned_words:
                     if guess_word[inx] in word and word in new_pruned_words:
-                        if word == 'pause':
-                            print("HAPPENS AT 00")
                         new_pruned_words.remove(word)
             else:
                 #remove all words with this letter more or less than calculated number of occurances
                 for word in pruned_words:
                     if word.count(guess_word[inx]) != letter_occurances_in_answer and word in new_pruned_words:
-                        if word == 'pause':
-                            print("HAPPENS AT 01")
                         new_pruned_words.remove(word)
         inx += 1
     return new_pruned_words
 
+
 def runscript():
     pruned_words = get_all_words()
+    turn = 0
+    while turn < 6:
+        print("length of pruned words is " + str(len(pruned_words)))
+        guess_word = get_guess_word('*****', pruned_words)
+        accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
+        if accuracy.count('0') + accuracy.count('1') + accuracy.count('2') != 5:
+            print("There seems to be a mistake in your success values")
+        else:
+            pruned_words = prune_words(guess_word, accuracy, pruned_words)
+            if accuracy == '22222':
+                turn = 7
+                print("Congradulations on your victory!")
 
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
+            turn += 1
+            
+    if turn == 6:
+        print("Sorry for your loss (in the game that is)")
 
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-
-    print("length of pruned words is " + str(len(pruned_words)))
-    guess_word = get_guess_word('*****', pruned_words)
-    accuracy = input ('INPUT "' + guess_word + '" then input success values')
-    pruned_words = prune_words(guess_word, accuracy, pruned_words)
-
-    
 runscript()
