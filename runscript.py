@@ -1,5 +1,8 @@
-import csv
-
+import csv, time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 def get_all_words():
     words = []
@@ -154,24 +157,60 @@ def prune_words(guess_word, accuracy, pruned_words):
     return new_pruned_words
 
 
+def make_guess(guess_word, driver):
+    actions = ActionChains(driver)  
+    actions.send_keys(guess_word)
+    actions.send_keys(Keys.RETURN)
+    actions.perform()
+    time.sleep(2) #Wait for wordle animation to play
+
+
+def close_modal(driver):
+    shadow_host = driver.find_element(By.CSS_SELECTOR, "game-app").shadow_root
+    modal_root = shadow_host.find_element(By.CSS_SELECTOR, 'game-modal').shadow_root
+    modal_root.find_element(By.CSS_SELECTOR, '.close-icon').click()
+
+
+def get_accuracy(driver, row):
+    accuracy = ""
+    game_app_root = driver.find_element(By.CSS_SELECTOR, "game-app").shadow_root
+    game_row = game_app_root.find_elements(By.CSS_SELECTOR, "game-row")[row]
+    row_root = game_row.shadow_root
+    tiles = row_root.find_elements(By.CSS_SELECTOR, "game-tile")
+    for game_tile in tiles:
+        if game_tile.get_attribute("evaluation") == "absent":
+            accuracy += "0"
+        elif game_tile.get_attribute("evaluation") == "present":
+            accuracy += "1"
+        elif game_tile.get_attribute("evaluation") == "correct":
+            accuracy += "2"
+    return accuracy
+
+
 def runscript():
     pruned_words = get_all_words()
     turn = 0
+    driver = webdriver.Chrome()
+    driver.get("https://www.powerlanguage.co.uk/wordle/")
+    close_modal(driver)
+    driver.maximize_window()
     while turn < 6:
         print("length of pruned words is " + str(len(pruned_words)))
         guess_word = get_guess_word('*****', pruned_words)
-        accuracy = input ('INPUT "' + guess_word + '" then input success values \n')
+        make_guess(guess_word, driver)
+        accuracy = get_accuracy(driver, turn)
         if accuracy.count('0') + accuracy.count('1') + accuracy.count('2') != 5:
             print("There seems to be a mistake in your success values")
         else:
             pruned_words = prune_words(guess_word, accuracy, pruned_words)
             if accuracy == '22222':
                 turn = 7
-                print("Congradulations on your victory!")
+                input("Congradulations on your victory!")
 
             turn += 1
             
     if turn == 6:
         print("Sorry for your loss (in the game that is)")
+    
 
 runscript()
