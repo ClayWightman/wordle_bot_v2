@@ -205,7 +205,7 @@ def runscript():
             pruned_words = prune_words(guess_word, accuracy, pruned_words)
             if accuracy == '22222':
                 turn = 7
-                input("Congradulations on your victory!")
+                input("Congratulations on your victory!")
 
             turn += 1
             
